@@ -39,6 +39,8 @@ var ArticleSchema = new Schema({
   comments: [{
     body: { type : String, default : '' },
     user: { type : Schema.ObjectId, ref : 'User' },
+    // Status Added
+    status: {type: String, default: 'PENDING'},
     createdAt: { type : Date, default : Date.now }
   }],
   tags: {type: [], get: getTags, set: setTags},
@@ -116,17 +118,31 @@ ArticleSchema.methods = {
   addComment: function (user, comment, cb) {
     var notify = require('../mailer');
 
-    this.comments.push({
-      body: comment.body,
-      user: user._id
-    });
 
-    if (!this.user.email) this.user.email = 'email@product.com';
-    notify.comment({
-      article: this,
-      currentUser: user,
-      comment: comment.body
-    });
+    // If Signed up user then add the user ref
+    if(user){
+      this.comments.push({
+        body: comment.body,
+        user: user._id
+      });
+    }
+    // Else add the comment in the article
+    else{
+      this.comments.push({
+        body: comment.body
+      });
+    }
+
+    // If Signed up user then notify him
+    if(user){
+      if (!this.user.email) this.user.email = 'email@product.com';
+      notify.comment({
+        article: this,
+        currentUser: user,
+        comment: comment.body
+      });
+    }
+
 
     this.save(cb);
   },

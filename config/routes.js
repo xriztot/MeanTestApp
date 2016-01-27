@@ -90,13 +90,9 @@ module.exports = function (app, passport) {
   // article routes
   app.param('id', articles.load);
   app.get('/articles', articles.index);
-  //app.get('/articles/new', auth.requiresLogin, articles.new);
-  //app.post('/articles', auth.requiresLogin, articles.create);
-
-
-  // Article can be post by Logged in user or Anonymous User
   app.get('/articles/new', auth.requiresLogin, articles.new);
   app.post('/articles', auth.requiresLogin, articles.create);
+
 
 
   app.get('/articles/:id', articles.show);
@@ -109,8 +105,16 @@ module.exports = function (app, passport) {
 
   // comment routes
   app.param('commentId', comments.load);
-  app.post('/articles/:id/comments', auth.requiresLogin, comments.create);
-  app.get('/articles/:id/comments', auth.requiresLogin, comments.create);
+
+  //app.post('/articles/:id/comments', auth.requiresLogin, comments.create);
+  //app.get('/articles/:id/comments', auth.requiresLogin, comments.create);
+
+
+  // Anonymous User can also post the comment
+  app.post('/articles/:id/comments',  comments.create);
+  app.get('/articles/:id/comments',   comments.create);
+
+
   app.delete('/articles/:id/comments/:commentId', commentAuth, comments.destroy);
 
   // tag routes
