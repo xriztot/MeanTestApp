@@ -1,10 +1,14 @@
 
-{% if (comment && comment.user) %}
+{% if (comment && comment.status == 'APPROVED') %}
   <div class="comment">
-    {% if (comment.user.name) %}
-      {% set name = comment.user.name %}
+    {% if (comment.user) %}
+      {% if (comment.user.name) %}
+        {% set name = comment.user.name %}
+      {% else %}
+        {% set name = comment.user.username %}
+      {% endif %}
     {% else %}
-      {% set name = comment.user.username %}
+      {% set name = 'Anonymous' %}
     {% endif %}
 
     <p>
