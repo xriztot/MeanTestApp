@@ -1,61 +1,52 @@
-'use strict';
 
-/*
-var cl = console.log;
-console.log = function(){
-  console.trace();
-  cl.apply(console,arguments);
+/*!
+ * nodejs-express-mongoose-demo
+ * Copyright(c) 2013 Madhusudhan Srinivasa <madhums8@gmail.com>
+ * MIT Licensed
+ */
+/**
+ * Module dependencies
+ */
+
+var fs = require('fs');
+var join = require('path').join;
+var express = require('express');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var config = require('config');
+
+var app = express();
+var port = process.env.PORT || 3000;
+
+// Connect to mongodb
+var connect = function () {
+  var options = { server: { socketOptions: { keepAlive: 1 } } };
+  mongoose.connect(config.db, options);
 };
-*/
+connect();
 
-// Requires meanio .
-var mean = require('meanio');
-var cluster = require('cluster');
-var deferred = require('q').defer();
+mongoose.connection.on('error', console.log);
+mongoose.connection.on('disconnected', connect);
 
+// Bootstrap models
+fs.readdirSync(join(__dirname, 'app/models')).forEach(function (file) {
+  if (~file.indexOf('.js')) require(join(__dirname, 'app/models', file));
+});
 
-// Code to run if we're in the master process or if we are not in debug mode/ running tests
+// Bootstrap passport config
+require('./config/passport')(passport, config);
 
-if ((cluster.isMaster) &&
-  (process.execArgv.indexOf('--debug') < 0) &&
-  (process.env.NODE_ENV!=='test') && (process.env.NODE_ENV!=='development') &&
-  (process.execArgv.indexOf('--singleProcess')<0)) {
-//if (cluster.isMaster) {
+// Bootstrap application settings
+require('./config/express')(app, passport);
 
-    console.log('for real!');
-    // Count the machine's CPUs
-    var cpuCount = process.env.CPU_COUNT || require('os').cpus().length;
+// Bootstrap routes
+require('./config/routes')(app, passport);
 
-    // Create a worker for each CPU
-    for (var i = 0; i < cpuCount; i += 1) {
-        console.log ('forking ',i);
-        cluster.fork();
-    }
+app.listen(port);
+console.log('Express app started on port ' + port);
 
-    // Listen for dying workers
-    cluster.on('exit', function (worker) {
-        // Replace the dead worker, we're not sentimental
-        console.log('Worker ' + worker.id + ' died :(');
-        cluster.fork();
+/**
+ * Expose
+ */
 
-    });
-
-// Code to run if we're in a worker process
-} else {
-
-    var workerId = 0;
-    if (!cluster.isMaster)
-    {
-        workerId = cluster.worker.id;
-    }
-// Creates and serves mean application
-    mean.serve({ workerid: workerId /* more options placeholder*/ }, function (app) {
-      var config = app.config.clean;
-      var port = config.https && config.https.port ? config.https.port : config.http.port;
-      console.log('Mean app started on port ' + port + ' (' + process.env.NODE_ENV + ') cluster.worker.id:', workerId);
-
-      deferred.resolve(app);
-    });
-}
-
-module.exports = deferred.promise;
+module.exports = app;

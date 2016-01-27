@@ -1,65 +1,124 @@
-/* globals require */
-'use strict';
 
 /**
  * Module dependencies.
  */
-var mean = require('meanio'),
-  compression = require('compression'),
-  consolidate = require('consolidate'),
-  express = require('express'),
-  helpers = require('view-helpers'),
-  flash = require('connect-flash'),
-  modRewrite = require('connect-modrewrite'),
-  // seo = require('mean-seo'),
-  config = mean.loadConfig(),
-  bodyParser = require('body-parser');
 
-module.exports = function(app, db) {
+var express = require('express');
+var session = require('express-session');
+var compression = require('compression');
+var morgan = require('morgan');
+var cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var csrf = require('csurf');
+var multer = require('multer');
+var swig = require('swig');
 
-  app.use(bodyParser.json(config.bodyParser.json));
-  app.use(bodyParser.urlencoded(config.bodyParser.urlencoded));
+var mongoStore = require('connect-mongo')(session);
+var flash = require('connect-flash');
+var winston = require('winston');
+var helpers = require('view-helpers');
+var config = require('config');
+var pkg = require('../package.json');
 
-  app.set('showStackError', true);
+var env = process.env.NODE_ENV || 'development';
 
-  // Prettify HTML
-  app.locals.pretty = true;
+/**
+ * Expose
+ */
 
-  // cache=memory or swig dies in NODE_ENV=production
-  app.locals.cache = 'memory';
+module.exports = function (app, passport) {
 
-  // Should be placed before express.static
-  // To ensure that all assets and data are compressed (utilize bandwidth)
+  // Compression middleware (should be placed before express.static)
   app.use(compression({
-    // Levels are specified in a range of 0 to 9, where-as 0 is
-    // no compression and 9 is best compression, but slowest
-    level: 9
+    threshold: 512
   }));
 
-  // Enable compression on bower_components
-  app.use('/bower_components', express.static(config.root + '/bower_components'));
+  // Static files middleware
+  app.use(express.static(config.root + '/public'));
 
-  // Adds logging based on logging config in config/env/ entry
-  require('./middlewares/logging')(app, config.logging);
+  // Use winston on production
+  var log;
+  if (env !== 'development') {
+    log = {
+      stream: {
+        write: function (message, encoding) {
+          winston.info(message);
+        }
+      }
+    };
+  } else {
+    log = 'dev';
+  }
 
-  // assign the template engine to .html files
-  app.engine('html', consolidate[config.templateEngine]);
+  // Don't log during tests
+  // Logging middleware
+  if (env !== 'test') app.use(morgan(log));
 
-  // set .html as the default extension
+  // Swig templating engine settings
+  if (env === 'development' || env === 'test') {
+    swig.setDefaults({
+      cache: false
+    });
+  }
+
+  // set views path, template engine and default layout
+  app.engine('html', swig.renderFile);
+  app.set('views', config.root + '/app/views');
   app.set('view engine', 'html');
 
+  // expose package.json to views
+  app.use(function (req, res, next) {
+    res.locals.pkg = pkg;
+    res.locals.env = env;
+    next();
+  });
 
-  // Dynamic helpers
-  app.use(helpers(config.app.name));
+  // bodyParser should be above methodOverride
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(multer());
+  app.use(methodOverride(function (req, res) {
+    if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+      // look in urlencoded POST bodies and delete it
+      var method = req.body._method;
+      delete req.body._method;
+      return method;
+    }
+  }));
 
-  // Connect flash for flash messages
+  // CookieParser should be above session
+  app.use(cookieParser());
+  app.use(cookieSession({ secret: 'secret' }));
+  app.use(session({
+    resave: true,
+    saveUninitialized: true,
+    secret: pkg.name,
+    store: new mongoStore({
+      url: config.db,
+      collection : 'sessions'
+    })
+  }));
+
+  // use passport session
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // connect flash for flash messages - should be declared after sessions
   app.use(flash());
 
-  app.use(modRewrite([
-    
-    '!^/api/.*|\\_getModules|\\.html|\\.js|\\.css|\\.swf|\\.jp(e?)g|\\.png|\\.ico|\\.gif|\\.svg|\\.eot|\\.ttf|\\.woff|\\.txt|\\.pdf$ / [L]'    
+  // should be declared after session and flash
+  app.use(helpers(pkg.name));
 
-  ]));
+  // adds CSRF support
+  if (process.env.NODE_ENV !== 'test') {
+    app.use(csrf());
 
-  // app.use(seo());
+    // This could be moved to view-helpers :-)
+    app.use(function (req, res, next) {
+      res.locals.csrf_token = req.csrfToken();
+      next();
+    });
+  }
 };

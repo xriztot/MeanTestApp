@@ -1,63 +1,33 @@
-'use strict';
+
+/**
+ * Expose
+ */
 
 module.exports = {
-  db: 'mongodb://' + (process.env.DB_PORT_27017_TCP_ADDR || 'localhost') + '/mean-test',
-  http: {
-    port: 3001
+  db: 'mongodb://localhost/noobjs_test',
+  facebook: {
+    clientID: process.env.FACEBOOK_CLIENTID,
+    clientSecret: process.env.FACEBOOK_SECRET,
+    callbackURL: "http://localhost:3000/auth/facebook/callback"
   },
-  aggregate: false,
-  assets: {
-    hash: false
+  twitter: {
+    clientID: process.env.TWITTER_CLIENTID,
+    clientSecret: process.env.TWITTER_SECRET,
+    callbackURL: "http://localhost:3000/auth/twitter/callback"
   },
-  logging: {
-    format: 'common'
+  github: {
+    clientID: process.env.GITHUB_CLIENTID,
+    clientSecret: process.env.GITHUB_SECRET,
+    callbackURL: 'http://localhost:3000/auth/github/callback'
   },
-  app: {
-    name: 'MEAN - A Modern Stack - Test'
+  linkedin: {
+    clientID: process.env.LINKEDIN_CLIENTID,
+    clientSecret: process.env.LINKEDIN_SECRET,
+    callbackURL: 'http://localhost:3000/auth/linkedin/callback'
   },
-  strategies: {
-    local: {
-      enabled: true
-    },
-    landingPage: '/',
-    facebook: {
-      clientID: 'APP_ID',
-      clientSecret: 'APP_SECRET',
-      callbackURL: 'http://localhost:3000/auth/facebook/callback',
-      enabled: false
-    },
-    twitter: {
-      clientID: 'CONSUMER_KEY',
-      clientSecret: 'CONSUMER_SECRET',
-      callbackURL: 'http://localhost:3000/auth/twitter/callback',
-      enabled: false
-    },
-    github: {
-      clientID: 'APP_ID',
-      clientSecret: 'APP_SECRET',
-      callbackURL: 'http://localhost:3000/auth/github/callback',
-      enabled: false
-    },
-    google: {
-      clientID: 'APP_ID',
-      clientSecret: 'APP_SECRET',
-      callbackURL: 'http://localhost:3000/auth/google/callback',
-      enabled: false
-    },
-    linkedin: {
-      clientID: 'API_KEY',
-      clientSecret: 'SECRET_KEY',
-      callbackURL: 'http://localhost:3000/auth/linkedin/callback',
-      enabled: false
-    }
-  },
-  emailFrom: 'SENDER EMAIL ADDRESS', // sender address like ABC <abc@example.com>
-  mailer: {
-    service: 'SERVICE_PROVIDER',
-    auth: {
-      user: 'EMAIL_ID',
-      pass: 'PASSWORD'
-    }
-  },
-  secret: 'SOME_TOKEN_SECRET'
+  google: {
+    clientID: process.env.GOOGLE_CLIENTID,
+    clientSecret: process.env.GOOGLE_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/callback"
+  }
 };
