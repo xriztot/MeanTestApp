@@ -1,0 +1,35 @@
+{% if (comment ) %}
+<div class="comment">
+    {% if (comment.user) %}
+    {% if (comment.user.name) %}
+    {% set name = comment.user.name %}
+    {% else %}
+    {% set name = comment.user.username %}
+    {% endif %}
+    {% else %}
+    {% set name = 'Anonymous' %}
+    {% endif %}
+
+    <p>
+        <a href="{{ '/users/' + comment.user._id }}">{{ name }}</a>
+        :&nbsp;
+        {{ comment.body }}
+    </p>
+
+    <!-- <p class="muted"> -->
+    <form role="form" method="post" action="{{ '/admin/articles/' + article._id + '/comments/' + comment._id }}"
+          onsubmit="return confirm('Are you sure?')" class="form-inline">
+        <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+        <span class="muted">{{ comment.createdAt.toISOString()|date('M d, Y  h:i a') }}</span>
+        &nbsp;
+        <a href="{{ '/admin/articles/' + article._id + '/comments/' + comment._id + '/approve'}}" title="approve" class="btn btn-info">
+            Approve
+        </a>
+        &nbsp;
+        <input type="hidden" name="_method" value="DELETE">
+        <button class="btn btn-danger btn-link error" type="submit">Delete</button>
+    </form>
+
+    <!-- </p> -->
+</div>
+{% endif %}

@@ -9,6 +9,7 @@
 var users = require('users');
 var articles = require('articles');
 var comments = require('comments');
+var admin = require('admin');
 var tags = require('tags');
 var auth = require('./middlewares/authorization');
 
@@ -102,6 +103,14 @@ module.exports = function (app, passport) {
   app.put('/articles/:id', articleAuth, articles.update);
   app.delete('/articles/:id', articleAuth, articles.destroy);
 
+
+  // admin routes
+  app.get('/admin/articles', admin.index);
+  app.get('/admin/articles/:id', admin.show);
+
+  app.delete('/admin/articles/:id/comments/:commentId', commentApproveAuth, admin.destroy);
+  app.get('/admin/articles/:id/comments/:commentId/approve', commentApproveAuth, admin.commentapprover);
+
   // home route
   app.get('/', articles.index);
 
@@ -115,9 +124,6 @@ module.exports = function (app, passport) {
   // Anonymous User can also post the comment
   app.post('/articles/:id/comments',  comments.create);
   app.get('/articles/:id/comments',   comments.create);
-
-  //app.post('/articles/:id/comments',  comments.create);
-
 
   app.delete('/articles/:id/comments/:commentId', commentAuth, comments.destroy);
 

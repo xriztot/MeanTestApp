@@ -4,6 +4,7 @@
  */
 
 exports.requiresLogin = function (req, res, next) {
+  console.log(req.body)
   if (req.isAuthenticated()) return next()
   if (req.method == 'GET') req.session.returnTo = req.originalUrl
   res.redirect('/login')
@@ -63,7 +64,8 @@ exports.commentApprove = {
   hasAuthorization: function (req, res, next) {
     // if the current user is comment owner or article owner
     // give them authority to delete
-    if (req.user.type === 'admin' ) {
+
+    if (req.user.username === 'rizadmin' ) {
 
       next()
     } else {

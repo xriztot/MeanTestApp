@@ -148,6 +148,21 @@ ArticleSchema.methods = {
   },
 
   /**
+   * Approve comment
+   *
+   * @param {commentId} String
+   * @param {Function} cb
+   * @api private
+   */
+
+  approveComment: function (commentId, cb) {
+    var index = utils.indexof(this.comments, { id: commentId });
+    if (~index) this.comments[index].status = 'APPROVED';
+    else return cb('not found');
+    this.save(cb);
+  },
+
+  /**
    * Remove comment
    *
    * @param {commentId} String

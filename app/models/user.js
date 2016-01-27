@@ -27,7 +27,7 @@ var UserSchema = new Schema({
   hashed_password: { type: String, default: '' },
   salt: { type: String, default: '' },
   authToken: { type: String, default: '' },
-  type: { type: String, default: 'user'},
+  usertype: { type: String, default: 'user'},
   facebook: {},
   twitter: {},
   github: {},
@@ -62,6 +62,12 @@ UserSchema.path('name').validate(function (name) {
   if (this.skipValidation()) return true;
   return name.length;
 }, 'Name cannot be blank');
+
+
+UserSchema.path('usertype').validate(function (usertype) {
+  if (this.skipValidation()) return true;
+  return usertype.length;
+}, 'User type cannot be blank');
 
 UserSchema.path('email').validate(function (email) {
   if (this.skipValidation()) return true;

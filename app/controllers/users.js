@@ -16,6 +16,7 @@ exports.load = function (req, res, next, id) {
     criteria: { _id : id }
   };
   User.load(options, function (err, user) {
+    console.log(user);
     if (err) return next(err);
     if (!user) return next(new Error('Failed to load User ' + id));
     req.profile = user;
@@ -108,6 +109,15 @@ exports.session = login;
  */
 
 function login (req, res) {
+  var options = {
+    criteria: { email : req.body.email }
+  };
+  User.load(options, function (err, user) {
+    console.log(user);
+    if (err) return next(err);
+    if (!user) return next(new Error('Failed to load User ' + id));
+    req.user = user;
+  });
   var redirectTo = req.session.returnTo ? req.session.returnTo : '/';
   delete req.session.returnTo;
   res.redirect(redirectTo);
