@@ -53,3 +53,22 @@ exports.comment = {
     }
   }
 }
+
+
+/**
+ * Comment authorization routing middleware for approving
+ */
+
+exports.commentApprove = {
+  hasAuthorization: function (req, res, next) {
+    // if the current user is comment owner or article owner
+    // give them authority to delete
+    if (req.user.type === 'admin' ) {
+
+      next()
+    } else {
+      req.flash('info', 'You are not authorized')
+      res.redirect('/articles/' + req.article.id)
+    }
+  }
+}

@@ -18,6 +18,7 @@ var auth = require('./middlewares/authorization');
 
 var articleAuth = [auth.requiresLogin, auth.article.hasAuthorization];
 var commentAuth = [auth.requiresLogin, auth.comment.hasAuthorization];
+var commentApproveAuth = [auth.requiresLogin, auth.commentApprove.hasAuthorization];
 
 /**
  * Expose routes
@@ -36,6 +37,7 @@ module.exports = function (app, passport) {
       failureFlash: 'Invalid email or password.'
     }), users.session);
   app.get('/users/:userId', users.show);
+
   //app.get('/auth/facebook',
   //  passport.authenticate('facebook', {
   //    scope: [ 'email', 'user_about_me'],
@@ -113,6 +115,8 @@ module.exports = function (app, passport) {
   // Anonymous User can also post the comment
   app.post('/articles/:id/comments',  comments.create);
   app.get('/articles/:id/comments',   comments.create);
+
+  //app.post('/articles/:id/comments',  comments.create);
 
 
   app.delete('/articles/:id/comments/:commentId', commentAuth, comments.destroy);

@@ -33,7 +33,7 @@ exports.create = function (req, res) {
     if (err) return res.render('500');
     res.redirect('/articles/'+ article.id);
   });
-}
+};
 
 /**
  * Delete comment
