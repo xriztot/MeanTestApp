@@ -22,10 +22,12 @@
         <input type="hidden" name="_csrf" value="{{ csrf_token }}">
         <span class="muted">{{ comment.createdAt.toISOString()|date('M d, Y  h:i a') }}</span>
         &nbsp;
+        {% if comment.status == 'PENDING' %}
         <a href="{{ '/admin/articles/' + article._id + '/comments/' + comment._id + '/approve'}}" title="approve" class="btn btn-info">
             Approve
         </a>
         &nbsp;
+        {% endif %}
         <input type="hidden" name="_method" value="DELETE">
         <button class="btn btn-danger btn-link error" type="submit">Delete</button>
     </form>

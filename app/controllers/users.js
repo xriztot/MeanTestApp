@@ -109,16 +109,11 @@ exports.session = login;
  */
 
 function login (req, res) {
-  var options = {
-    criteria: { email : req.body.email }
-  };
-  User.load(options, function (err, user) {
-    console.log(user);
-    if (err) return next(err);
-    if (!user) return next(new Error('Failed to load User ' + id));
-    req.user = user;
-  });
-  var redirectTo = req.session.returnTo ? req.session.returnTo : '/';
+    var redirect = '/';
+   if(req.user.username == 'rizadmin'){
+     redirect = '/admin/articles';
+   }
+  var redirectTo = req.session.returnTo ? req.session.returnTo : redirect;
   delete req.session.returnTo;
   res.redirect(redirectTo);
 };
