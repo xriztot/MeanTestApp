@@ -35,7 +35,7 @@
     "express-session": "1.11.3",
     "forever": "0.14.2",
     "imager": "0.2.7",
-    "method-override": "2.3.3",
+    "method-override": "2.3.10",
     "mongoose": "4.0.6",
     "morgan": "1.6.1",
     "multer": "0.1.8",
